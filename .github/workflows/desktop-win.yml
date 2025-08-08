@@ -1,0 +1,72 @@
+﻿name: desktop-win
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install NSIS (Windows installer)
+        run: choco install nsis -y
+
+      - name: Build backend sidecar (PyInstaller)
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+          pyinstaller --noconsole --onefile --name backend backend_runner.py
+          mkdir desktop\src-tauri\binaries
+          copy dist\backend.exe desktop\src-tauri\binaries\backend-x86_64-pc-windows-msvc.exe
+
+      - name: Ensure Tauri icon exists (satisfy tauri-build)
+        shell: pwsh
+        run: |
+           = Resolve-Path .\desktop\src-tauri
+           = Join-Path  'icons'
+          if (!(Test-Path )) { New-Item -ItemType Directory -Path  -Force | Out-Null }
+           = Join-Path  'icon.ico'
+          if (!(Test-Path )) {
+            Add-Type -AssemblyName System.Drawing
+             = New-Object System.Drawing.Bitmap 64,64
+               = [System.Drawing.Graphics]::FromImage()
+            .Clear([System.Drawing.Color]::FromArgb(255, 30, 136, 229))
+               = .GetHicon()
+             = [System.Drawing.Icon]::FromHandle()
+              = [System.IO.File]::Open(, [System.IO.FileMode]::Create)
+            .Save(); .Close(); .Dispose(); .Dispose()
+          }
+
+      - name: Install client deps
+        run: npm ci --prefix client
+
+      - name: Install desktop deps
+        run: npm ci --prefix desktop
+
+      - name: Build Tauri (Windows)
+        run: npx --prefix desktop tauri build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gridiron-desktop-win
+          path: |
+            desktop\src-tauri\target\release\bundle\**

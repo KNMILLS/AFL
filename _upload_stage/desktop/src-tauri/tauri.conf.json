@@ -1,0 +1,35 @@
+{
+  "package": {
+    "productName": "Gridiron Desktop",
+    "version": "0.1.0"
+  },
+  "build": {
+    "beforeDevCommand": "npm install --prefix ../client && npm run dev --prefix ../client",
+    "beforeBuildCommand": "npm install --prefix ../client && npm run build --prefix ../client",
+    "devPath": "http://localhost:5173",
+    "distDir": "../client/dist"
+  },
+  "tauri": {
+    "allowlist": {
+      "shell": { "sidecar": true,
+    "scope": [
+      { "name": "binaries/backend", "sidecar": true }
+    ]
+   }
+    },
+    "bundle": {
+      "identifier": "com.gridiron.desktop",
+      "icon": ["icons/icon.ico"],
+      "externalBin": ["binaries/backend"]
+    },
+    "windows": [
+      {
+        "title": "Gridiron Desktop",
+        "width": 1280,
+        "height": 800,
+        "resizable": true
+      }
+    ],
+    "security": { "csp": null }
+  }
+}

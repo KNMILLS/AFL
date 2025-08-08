@@ -1,0 +1,31 @@
+﻿# Node / Vite
+client/node_modules/
+desktop/node_modules/
+client/dist/
+.vite/
+npm-debug.log*
+yarn-error.log*
+
+# Rust / Tauri
+desktop/src-tauri/target/
+desktop/src-tauri/binaries/
+desktop/src-tauri/gen/
+*.pdb
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+dist/
+build/
+*.spec
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Executables
+*.exe
